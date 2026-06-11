@@ -245,6 +245,24 @@ def build_product_links(amazon_url: str, rakuten_url: str) -> str:
     return '<p class="link-placeholder">購入リンクは準備中です。</p>'
 
 
+def build_product_specs(product: dict[str, str]) -> str:
+    items: list[str] = []
+
+    for index in range(1, 5):
+        label = (product.get(f"spec{index}_label") or "").strip()
+        value = (product.get(f"spec{index}_value") or "").strip()
+        if not label or not value:
+            continue
+        items.append(
+            f"<div><dt>{escape(label)}</dt><dd>{escape(value)}</dd></div>"
+        )
+
+    if not items:
+        return ""
+
+    return f'<dl class="spec-list">{"".join(items)}</dl>'
+
+
 def build_product_cards(products: list[dict[str, str]]) -> str:
     card_template = TEMPLATES_DIR / "product_card.html"
     cards: list[str] = []
@@ -256,10 +274,7 @@ def build_product_cards(products: list[dict[str, str]]) -> str:
                 {
                     "name": escape(product.get("name", "")),
                     "category": escape(product.get("category", "")),
-                    "cpu": escape(product.get("cpu", "")),
-                    "memory": escape(product.get("memory", "")),
-                    "storage": escape(product.get("storage", "")),
-                    "os": escape(product.get("os", "")),
+                    "product_specs": build_product_specs(product),
                     "use_case": escape(product.get("use_case", "")),
                     "pros": escape(product.get("pros", "")),
                     "cons": escape(product.get("cons", "")),

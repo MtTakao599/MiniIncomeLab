@@ -1,6 +1,6 @@
 # MiniIncomeLab
 
-ミニPC上の Ubuntu で定期実行し、静的サイトを自動生成するアフィリエイト/情報サイト生成ツール（v0.1.7）。
+ミニPC上の Ubuntu で定期実行し、静的サイトを自動生成するアフィリエイト/情報サイト生成ツール（v0.1.9）。
 
 - **開発**: Windows + Cursor
 - **管理**: GitHub
@@ -12,9 +12,9 @@
 
 MiniIncomeLab は、商品情報を `content/products_source.csv`、アフィリエイトリンクを `content/affiliate_links.csv` に分けて管理し、`scripts/build_site.py` で静的 HTML を生成する最小構成のサイトビルダーです。
 
-v0.1.7 では、**商品情報とアフィリエイトリンクの分離**に対応しました。リンクだけを手動管理し、商品説明・スペック側の上書き事故を防ぎます。
+v0.1.9 では、**商品カードのスペック表示を汎用化**しました。`spec1_label` / `spec1_value` 〜 `spec4_*` により、ミニPC本体だけでなく USB-C 充電器・外付け SSD・UPS など周辺機器にも自然なラベルで表示できます。
 
-**v0.1.7 時点の参加状況:**
+**v0.1.9 時点の参加状況:**
 
 - **楽天アフィリエイト**: 利用中（リンクは `affiliate_links.csv` の `rakuten_url` に手動で貼る）
 - **Amazonアソシエイト**: 未参加（`amazon_url` は空欄のまま）
@@ -225,7 +225,14 @@ crontab -e
 
 列:
 
-`id,status,name,category,cpu,memory,storage,os,use_case,pros,cons,rating,last_checked`
+`id,status,name,category,spec1_label,spec1_value,spec2_label,spec2_value,spec3_label,spec3_value,spec4_label,spec4_value,use_case,pros,cons,rating,last_checked`
+
+スペック表示（`spec1` 〜 `spec4`）:
+
+- 商品ごとに **ラベル（`spec*_label`）** と **値（`spec*_value`）** を自由に設定できる
+- ミニPC本体の例: `CPU` / `メモリ` / `ストレージ` / `OS`
+- 周辺機器の例: `出力` / `端子` / `接続` / `用途` など
+- ラベルまたは値が空欄の spec はサイトに表示されない
 
 `status` の値:
 
