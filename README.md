@@ -1,6 +1,6 @@
 # MiniIncomeLab
 
-ミニPC上の Ubuntu で定期実行し、静的サイトを自動生成するアフィリエイト/情報サイト生成ツール（v0.1.6）。
+ミニPC上の Ubuntu で定期実行し、静的サイトを自動生成するアフィリエイト/情報サイト生成ツール（v0.1.7）。
 
 - **開発**: Windows + Cursor
 - **管理**: GitHub
@@ -10,20 +10,30 @@
 
 ## プロジェクト概要
 
-MiniIncomeLab は、商品情報を `content/products.csv` に手動で書き込み、`scripts/build_site.py` で静的 HTML を生成する最小構成のサイトビルダーです。
+MiniIncomeLab は、商品情報を `content/products_source.csv`、アフィリエイトリンクを `content/affiliate_links.csv` に分けて管理し、`scripts/build_site.py` で静的 HTML を生成する最小構成のサイトビルダーです。
 
-v0.1.6 では、**楽天アフィリエイト利用開始**に合わせた表記更新、`products.csv` の `rakuten_url` 手動更新運用、**CSV を毎日編集しない運用**（`status` 列による表示制御）に対応しています。
+v0.1.7 では、**商品情報とアフィリエイトリンクの分離**に対応しました。リンクだけを手動管理し、商品説明・スペック側の上書き事故を防ぎます。
 
-**v0.1.6 時点の参加状況:**
+**v0.1.7 時点の参加状況:**
 
-- **楽天アフィリエイト**: 利用中（リンクは `products.csv` の `rakuten_url` に手動で貼る）
-- **Amazonアソシエイト**: 未参加
-- 価格・在庫・仕様の自動取得やスクレイピングは行わない
+- **楽天アフィリエイト**: 利用中（リンクは `affiliate_links.csv` の `rakuten_url` に手動で貼る）
+- **Amazonアソシエイト**: 未参加（`amazon_url` は空欄のまま）
+- 価格・在庫・仕様の自動取得、スクレイピング、API 連携は行わない
 
-### 日常運用ルール（v0.1.6）
+> **移行メモ:** 旧 `content/products.csv` は v0.1.7 で廃止しました。利用しないでください。
 
-- **`products.csv` は毎日編集しない**（記事や固定ページのビルドだけ毎日回す）
-- **週1回〜月1回**、商品リンク・スペック・`last_checked` を手動確認する
+### 2ファイル構成（v0.1.7）
+
+| ファイル | 役割 | 誰が触るか |
+|---------|------|-----------|
+| `products_source.csv` | 商品名・スペック・用途・status など | 自動更新 / 半自動更新の対象 |
+| `affiliate_links.csv` | Amazon / 楽天リンクのみ | **普段は小石さんが手動更新** |
+
+リンクファイルを分けることで、商品情報の更新時にアフィリエイト URL を誤って上書きする事故を防ぎます。
+
+### 日常運用ルール
+- **`affiliate_links.csv` 以外は毎日編集しない**（記事や固定ページのビルドだけ毎日回す）
+- **週1回〜月1回**、`affiliate_links.csv` のリンクと `products_source.csv` の内容を確認する
 - **ミニPC（Ubuntu）** では毎日 `git pull` → `check_links.py` → `build_site.py --clean` を自動実行する
 - 商品を一時的に非表示にしたい場合は **`status=hidden`**
 - 下書きとして保管したい場合は **`status=draft`**
@@ -57,7 +67,8 @@ Amazonアソシエイト申請前に、**10 記事程度のオリジナルコン
 ```
 MiniIncomeLab/
   content/
-    products.csv          # 商品データ（手動更新）
+    products_source.csv   # 商品情報（スペック・説明・status）
+    affiliate_links.csv   # アフィリエイトリンク（手動管理）
     articles/             # 記事 Markdown（*.md）
     pages/                # 固定ページ Markdown（about.md, privacy.md 等）
   templates/
@@ -180,7 +191,7 @@ crontab -e
 ```
 
 - 毎日自動実行するのは **pull / check / build** のみ
-- `products.csv` の編集は週1回〜月1回の手動確認時で十分
+- **`affiliate_links.csv` の編集**は週1回〜月1回の手動確認時で十分
 - ビルド後に GitHub Pages へ反映する場合は、必要に応じて `docs/` を commit / push する（v0.2 以降で自動化を検討）
 
 ## 公開方法（GitHub Pages / Cloudflare Pages）
@@ -205,16 +216,16 @@ crontab -e
 
 ミニPC自体はルーター越しに外部公開せず、生成と Git 同期のみ行う想定です。
 
-## 商品情報の更新
+## 商品情報とリンクの更新
 
-1. `content/products.csv` を編集する
-2. `python scripts/check_links.py` でリンクを確認する
-3. `python scripts/build_site.py --clean` で再生成する
-4. `docs/` を commit / push する
+### 商品情報（products_source.csv）
 
-CSV 列:
+1. `content/products_source.csv` を編集する
+2. `python scripts/build_site.py --clean` で再生成する
 
-`id,name,category,cpu,memory,storage,os,use_case,pros,cons,rating,amazon_url,rakuten_url,last_checked,status`
+列:
+
+`id,status,name,category,cpu,memory,storage,os,use_case,pros,cons,rating,last_checked`
 
 `status` の値:
 
@@ -224,25 +235,32 @@ CSV 列:
 | `draft` | 下書き（非表示） |
 | `hidden` | 非表示（一時的に掲載停止） |
 
+### アフィリエイトリンク（affiliate_links.csv）
+
+1. 楽天アフィリエイト（または将来の Amazon）管理画面でリンクを取得する
+2. `content/affiliate_links.csv` の該当 `id` 行に URL を貼り付ける
+3. `python scripts/check_links.py` で URL 形式を確認する（空欄は許容、不正 URL のみエラー）
+4. `python scripts/build_site.py --clean` で再生成する
+
+列:
+
+`id,amazon_url,rakuten_url,note`
+
+- `id` は `products_source.csv` と同じ値に揃える
+- `note` は用途メモ用（サイトには表示されない）
+- リンク行がなくてもビルドは続行（購入ボタンは「準備中」表示）
+
+### 共通ルール
+
 - 文字コード: UTF-8（BOM 付きでも可）
 - カンマを含む値は `"..."` で囲む（Excel 保存時も同様）
 - 日本語を含む値もそのまま記述可能
-
-商品名・スペック・リンクは `content/products.csv` を手動で更新してください。正確性は運営者が個別に確認する前提です。
-
-### 楽天アフィリエイトリンクの更新
-
-1. 楽天アフィリエイトの管理画面で商品リンクを取得する
-2. `content/products.csv` の **`rakuten_url` 列** に、その URL を手動で貼り付ける
-3. `python scripts/check_links.py` で URL 形式を確認する（**active のみ**対象。空欄は許容、不正 URL のみエラー）
-4. `python scripts/build_site.py --clean` で再生成する
-
-`rakuten_url` / `amazon_url` が空でもビルドは続行できます（active 商品向けに、週1回〜月1回の確認時に貼り付け）。Amazon リンク（`amazon_url`）は引き続き未参加のため、現状は検索 URL 等の仮リンクのままでも構いません。
+- 更新後は `docs/` を commit / push する
 
 ## アフィリエイトリンク利用時の注意
 
-- **楽天アフィリエイト**: 利用中。規約を遵守し、`rakuten_url` を手動更新する
-- **Amazonアソシエイト**: 未参加。参加後に `amazon_url` を本番リンクへ差し替える
+- **楽天アフィリエイト**: 利用中。規約を遵守し、`affiliate_links.csv` の `rakuten_url` を手動更新する
+- **Amazonアソシエイト**: 未参加。参加後に `affiliate_links.csv` の `amazon_url` を更新する
 - 価格や在庫の自動取得は行わず、各販売ページで最新情報を確認するよう案内する
 - ページ下部にアフィリエイト表記を記載する（`templates/index.html` 等）
 - リンク先 URL は定期的に `check_links.py` と手動確認でメンテナンスする

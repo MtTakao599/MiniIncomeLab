@@ -1,0 +1,4 @@
+id,status,name,category,cpu,memory,storage,os,use_case,pros,cons,rating,last_checked
+n100,active,N100系ミニPC,エントリー,Intel N100,16GB DDR4,512GB NVMe,Windows 11 Pro,"Web閲覧, 動画視聴, 軽い在宅ワーク",静音・省電力・初期費用を抑えやすい,重い動画編集やゲームには不向き,4,2026-06-11
+n150,active,N150系ミニPC,バランス,Intel N150,16GB DDR5,512GB NVMe,Windows 11 Pro,在宅ワーク・複数タブ・軽い開発,前世代より処理性能が上がりコスパ良好,4K編集や最新ゲームは厳しい,4,2026-06-01
+ryzen,active,Ryzen系ミニPC,高性能,AMD Ryzen 7 7840HS,32GB DDR5,1TB NVMe,Windows 11 Pro,開発・仮想化・軽いクリエイティブ作業,CPU性能が高く将来性がある,価格・発熱・サイズはN100/N150より大きめ,5,2026-06-01

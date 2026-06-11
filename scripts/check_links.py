@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""products.csv 内のアフィリエイトリンクを簡易チェックする。"""
+"""affiliate_links.csv 内のアフィリエイトリンクを簡易チェックする。"""
 
 from __future__ import annotations
 
@@ -11,7 +11,8 @@ from urllib.parse import urlparse
 
 
 ROOT = Path(__file__).resolve().parent.parent
-PRODUCTS_CSV = ROOT / "content" / "products.csv"
+PRODUCTS_SOURCE_CSV = ROOT / "content" / "products_source.csv"
+AFFILIATE_LINKS_CSV = ROOT / "content" / "affiliate_links.csv"
 
 LINK_COLUMNS = ("amazon_url", "rakuten_url")
 PRODUCT_STATUS_ACTIVE = "active"
@@ -32,43 +33,72 @@ def normalize_status(value: str) -> str:
     return (value or PRODUCT_STATUS_ACTIVE).strip().lower()
 
 
+def read_csv_rows(path: Path) -> list[dict[str, str]]:
+    with path.open(encoding="utf-8-sig", newline="") as fh:
+        return list(csv.DictReader(fh))
+
+
+def load_products_source() -> list[dict[str, str]]:
+    if not PRODUCTS_SOURCE_CSV.exists():
+        print(f"ERROR: products_source.csv が見つかりません: {PRODUCTS_SOURCE_CSV}")
+        sys.exit(1)
+    return read_csv_rows(PRODUCTS_SOURCE_CSV)
+
+
+def load_affiliate_links() -> list[dict[str, str]]:
+    if not AFFILIATE_LINKS_CSV.exists():
+        print(f"ERROR: affiliate_links.csv が見つかりません: {AFFILIATE_LINKS_CSV}")
+        sys.exit(1)
+    return read_csv_rows(AFFILIATE_LINKS_CSV)
+
+
 def check_links() -> int:
-    if not PRODUCTS_CSV.exists():
-        print(f"ERROR: products.csv が見つかりません: {PRODUCTS_CSV}")
-        return 1
+    products = load_products_source()
+    affiliate_rows = load_affiliate_links()
+
+    product_ids = {
+        (row.get("id") or "").strip()
+        for row in products
+        if (row.get("id") or "").strip()
+    }
+    active_product_ids = {
+        (row.get("id") or "").strip()
+        for row in products
+        if (row.get("id") or "").strip()
+        and normalize_status(row.get("status", "")) == PRODUCT_STATUS_ACTIVE
+    }
+    affiliate_ids = {
+        (row.get("id") or "").strip()
+        for row in affiliate_rows
+        if (row.get("id") or "").strip()
+    }
 
     errors: list[str] = []
     warnings: list[str] = []
-    checked_active = 0
-    skipped = 0
 
-    with PRODUCTS_CSV.open(encoding="utf-8-sig", newline="") as fh:
-        reader = csv.DictReader(fh)
-        for row_num, row in enumerate(reader, start=2):
-            product_id = row.get("id", "").strip() or f"row-{row_num}"
-            product_name = row.get("name", "").strip() or "(名称なし)"
-            status = normalize_status(row.get("status", ""))
-
-            if status != PRODUCT_STATUS_ACTIVE:
-                skipped += 1
-                continue
-
-            checked_active += 1
-
-            for column in LINK_COLUMNS:
-                value = (row.get(column) or "").strip()
-                if not value:
-                    continue
-                if not looks_like_url(value):
-                    errors.append(
-                        f"行 {row_num} [{product_id}] {product_name}: "
-                        f"{column} が URL 形式ではありません -> {value}"
-                    )
-
-    if skipped:
+    for product_id in sorted(active_product_ids - affiliate_ids):
         warnings.append(
-            f"draft / hidden の商品 {skipped} 件はリンクチェック対象外です"
+            f"[{product_id}] active 商品ですが affiliate_links.csv に行がありません"
         )
+
+    for product_id in sorted(affiliate_ids - product_ids):
+        warnings.append(
+            f"[{product_id}] affiliate_links.csv にありますが "
+            "products_source.csv に存在しません"
+        )
+
+    for row_num, row in enumerate(affiliate_rows, start=2):
+        product_id = (row.get("id") or "").strip() or f"row-{row_num}"
+
+        for column in LINK_COLUMNS:
+            value = (row.get(column) or "").strip()
+            if not value:
+                continue
+            if not looks_like_url(value):
+                errors.append(
+                    f"affiliate_links.csv 行 {row_num} [{product_id}]: "
+                    f"{column} が URL 形式ではありません -> {value}"
+                )
 
     if warnings:
         print("リンクチェック: 警告あり")
@@ -81,10 +111,16 @@ def check_links() -> int:
             print(f"  - {error}")
         return 1
 
-    print(
-        "リンクチェック: OK"
-        f"（active {checked_active} 件を確認。空欄は許容、不正 URL のみエラー）"
-    )
+    if warnings:
+        print(
+            "リンクチェック: OK"
+            "（空欄は許容。不正 URL のみエラー。警告あり）"
+        )
+    else:
+        print(
+            "リンクチェック: OK"
+            "（affiliate_links.csv を確認。空欄は許容、不正 URL のみエラー）"
+        )
     return 0
 
 

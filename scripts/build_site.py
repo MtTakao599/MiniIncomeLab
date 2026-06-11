@@ -22,7 +22,8 @@ DOCS_DIR = ROOT / "docs"
 DOCS_ARTICLES_DIR = DOCS_DIR / "articles"
 LOGS_DIR = ROOT / "logs"
 
-PRODUCTS_CSV = CONTENT_DIR / "products.csv"
+PRODUCTS_SOURCE_CSV = CONTENT_DIR / "products_source.csv"
+AFFILIATE_LINKS_CSV = CONTENT_DIR / "affiliate_links.csv"
 OUTPUT_HTML = DOCS_DIR / "index.html"
 ROBOTS_TXT = DOCS_DIR / "robots.txt"
 SITEMAP_XML = DOCS_DIR / "sitemap.xml"
@@ -85,18 +86,60 @@ def filter_active_products(products: list[dict[str, str]]) -> list[dict[str, str
     ]
 
 
-def load_products() -> list[dict[str, str]]:
-    if not PRODUCTS_CSV.exists():
-        raise FileNotFoundError(f"products.csv が見つかりません: {PRODUCTS_CSV}")
+def read_csv_rows(path: Path) -> list[dict[str, str]]:
+    with path.open(encoding="utf-8-sig", newline="") as fh:
+        return list(csv.DictReader(fh))
 
-    with PRODUCTS_CSV.open(encoding="utf-8-sig", newline="") as fh:
-        reader = csv.DictReader(fh)
-        rows = list(reader)
 
+def load_products_source() -> list[dict[str, str]]:
+    if not PRODUCTS_SOURCE_CSV.exists():
+        raise FileNotFoundError(
+            f"products_source.csv が見つかりません: {PRODUCTS_SOURCE_CSV}"
+        )
+
+    rows = read_csv_rows(PRODUCTS_SOURCE_CSV)
     if not rows:
-        raise ValueError("products.csv に商品データがありません")
+        raise ValueError("products_source.csv に商品データがありません")
 
     return rows
+
+
+def load_affiliate_links() -> dict[str, dict[str, str]]:
+    if not AFFILIATE_LINKS_CSV.exists():
+        return {}
+
+    links: dict[str, dict[str, str]] = {}
+    for row in read_csv_rows(AFFILIATE_LINKS_CSV):
+        product_id = (row.get("id") or "").strip()
+        if product_id:
+            links[product_id] = row
+    return links
+
+
+def merge_products_with_links(
+    products: list[dict[str, str]],
+    affiliate_links: dict[str, dict[str, str]],
+) -> list[dict[str, str]]:
+    merged: list[dict[str, str]] = []
+
+    for product in products:
+        product_id = (product.get("id") or "").strip()
+        link_row = affiliate_links.get(product_id, {})
+        merged.append(
+            {
+                **product,
+                "amazon_url": (link_row.get("amazon_url") or "").strip(),
+                "rakuten_url": (link_row.get("rakuten_url") or "").strip(),
+            }
+        )
+
+    return merged
+
+
+def load_products() -> list[dict[str, str]]:
+    products = load_products_source()
+    affiliate_links = load_affiliate_links()
+    return merge_products_with_links(products, affiliate_links)
 
 
 def parse_markdown_document(path: Path) -> MarkdownDocument:
@@ -181,6 +224,27 @@ def markdown_to_html(text: str) -> str:
     return "\n".join(parts)
 
 
+def build_product_links(amazon_url: str, rakuten_url: str) -> str:
+    links: list[str] = []
+
+    if amazon_url.strip():
+        links.append(
+            f'<a class="btn btn-amazon" href="{escape(amazon_url)}" '
+            'target="_blank" rel="noopener noreferrer sponsored">Amazonで見る</a>'
+        )
+
+    if rakuten_url.strip():
+        links.append(
+            f'<a class="btn btn-rakuten" href="{escape(rakuten_url)}" '
+            'target="_blank" rel="noopener noreferrer sponsored">楽天で見る</a>'
+        )
+
+    if links:
+        return "\n".join(links)
+
+    return '<p class="link-placeholder">購入リンクは準備中です。</p>'
+
+
 def build_product_cards(products: list[dict[str, str]]) -> str:
     card_template = TEMPLATES_DIR / "product_card.html"
     cards: list[str] = []
@@ -200,8 +264,10 @@ def build_product_cards(products: list[dict[str, str]]) -> str:
                     "pros": escape(product.get("pros", "")),
                     "cons": escape(product.get("cons", "")),
                     "rating": escape(product.get("rating", "")),
-                    "amazon_url": escape(product.get("amazon_url", "")),
-                    "rakuten_url": escape(product.get("rakuten_url", "")),
+                    "product_links": build_product_links(
+                        product.get("amazon_url", ""),
+                        product.get("rakuten_url", ""),
+                    ),
                     "last_checked": escape(product.get("last_checked", "")),
                 },
             )
@@ -386,7 +452,7 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
         products = load_products()
         active_products = filter_active_products(products)
         log(
-            f"products.csv を読み込み: {len(products)} 件 "
+            f"products_source.csv を読み込み: {len(products)} 件 "
             f"(表示対象: {len(active_products)} 件)"
         )
 
