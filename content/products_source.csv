@@ -1,8 +1,8 @@
-id,status,name,category,spec1_label,spec1_value,spec2_label,spec2_value,spec3_label,spec3_value,spec4_label,spec4_value,use_case,pros,cons,rating,last_checked
-n100,active,N100系ミニPC,エントリー,CPU,Intel N100,メモリ,16GB DDR4,ストレージ,512GB NVMe,OS,Windows 11 Pro,"Web閲覧, 動画視聴, 軽い在宅ワーク",静音・省電力・初期費用を抑えやすい,重い動画編集やゲームには不向き,4,2026-06-11
-n150,active,N150系ミニPC,バランス,CPU,Intel N150,メモリ,16GB DDR5,ストレージ,512GB NVMe,OS,Windows 11 Pro,在宅ワーク・複数タブ・軽い開発,前世代より処理性能が上がりコスパ良好,4K編集や最新ゲームは厳しい,4,2026-06-01
-ryzen,active,Ryzen系ミニPC,高性能,CPU,AMD Ryzen 7 7840HS,メモリ,32GB DDR5,ストレージ,1TB NVMe,OS,Windows 11 Pro,開発・仮想化・軽いクリエイティブ作業,CPU性能が高く将来性がある,価格・発熱・サイズはN100/N150より大きめ,5,2026-06-01
-core-ultra-ai,active,Core Ultra 5 / AI PC系ミニPC,AI PC入門,CPU,Intel Core Ultra 5,メモリ,16GB〜32GB DDR5/LPDDR5,ストレージ,512GB〜1TB NVMe,OS,Windows 11 Pro,N100/N150より余裕のある作業・AI PC入門・長期利用,新世代CPUで性能と省電力のバランスが良い,価格はN100/N150より高め。Core Ultra 7やRyzen上位機も比較したい,4,2026-06-11
-usb-c-power,active,USB-C充電器・モバイルバッテリー,電源・充電,出力,30W〜100Wクラス,端子,USB-C PD対応,用途,スマホ・ノートPC充電,形状,充電器/一体型バッテリー,外出時の充電・デスク周りの電源整理・旅行用,スマホやノートPCと兼用しやすく荷物を減らしやすい,出力W数や対応ケーブルによって充電速度が変わるため購入前確認が必要,4,2026-06-11
-external-ssd,active,外付けSSD・NVMeケース,ストレージ,接続,USB 3.2 / USB4,対応,NVMe SSD,用途,バックアップ・容量追加,注意,放熱性・対応サイズ,ミニPCの容量不足対策・バックアップ・写真動画保存,内蔵容量を増やしにくいミニPCと相性が良い,SSD本体が別売りの場合や発熱対策が必要な製品がある,4,2026-06-11
-mini-ups,active,小型UPS・電源タップ,常時稼働・電源対策,用途,ミニPC・ルーター向け,電源,家庭用100V,目的,瞬断・停電対策,注意,容量・出力方式確認,ミニPCやルーターの瞬断対策・常時稼働環境の安定化,停電や瞬断時のトラブルを減らしやすい,容量や出力方式によって使える機器が限られるため確認が必要,4,2026-06-11
+id,status,group,name,category,spec1_label,spec1_value,spec2_label,spec2_value,spec3_label,spec3_value,spec4_label,spec4_value,use_case,pros,cons,rating,last_checked
+n100,active,ミニPC本体,N100系ミニPC,エントリー,CPU,Intel N100,メモリ,16GB DDR4,ストレージ,512GB NVMe,OS,Windows 11 Pro,"Web閲覧, 動画視聴, 軽い在宅ワーク",静音・省電力・初期費用を抑えやすい,重い動画編集やゲームには不向き,4,2026-06-11
+n150,active,ミニPC本体,N150系ミニPC,バランス,CPU,Intel N150,メモリ,16GB DDR5,ストレージ,512GB NVMe,OS,Windows 11 Pro,在宅ワーク・複数タブ・軽い開発,前世代より処理性能が上がりコスパ良好,4K編集や最新ゲームは厳しい,4,2026-06-01
+ryzen,active,ミニPC本体,Ryzen系ミニPC,高性能,CPU,AMD Ryzen 7 7840HS,メモリ,32GB DDR5,ストレージ,1TB NVMe,OS,Windows 11 Pro,開発・仮想化・軽いクリエイティブ作業,CPU性能が高く将来性がある,価格・発熱・サイズはN100/N150より大きめ,5,2026-06-01
+core-ultra-ai,active,ミニPC本体,Core Ultra 5 / AI PC系ミニPC,AI PC入門,CPU,Intel Core Ultra 5,メモリ,16GB〜32GB DDR5/LPDDR5,ストレージ,512GB〜1TB NVMe,OS,Windows 11 Pro,N100/N150より余裕のある作業・AI PC入門・長期利用,新世代CPUで性能と省電力のバランスが良い,価格はN100/N150より高め。Core Ultra 7やRyzen上位機も比較したい,4,2026-06-11
+usb-c-power,active,周辺機器・常時稼働用品,USB-C充電器・モバイルバッテリー,電源・充電,出力,30W〜100Wクラス,端子,USB-C PD対応,用途,スマホ・ノートPC充電,形状,充電器/一体型バッテリー,外出時の充電・デスク周りの電源整理・旅行用,スマホやノートPCと兼用しやすく荷物を減らしやすい,出力W数や対応ケーブルによって充電速度が変わるため購入前確認が必要,4,2026-06-11
+external-ssd,active,周辺機器・常時稼働用品,外付けSSD・NVMeケース,ストレージ,接続,USB 3.2 / USB4,対応,NVMe SSD,用途,バックアップ・容量追加,注意,放熱性・対応サイズ,ミニPCの容量不足対策・バックアップ・写真動画保存,内蔵容量を増やしにくいミニPCと相性が良い,SSD本体が別売りの場合や発熱対策が必要な製品がある,4,2026-06-11
+mini-ups,active,周辺機器・常時稼働用品,小型UPS・電源タップ,常時稼働・電源対策,用途,ミニPC・ルーター向け,電源,家庭用100V,目的,瞬断・停電対策,注意,容量・出力方式確認,ミニPCやルーターの瞬断対策・常時稼働環境の安定化,停電や瞬断時のトラブルを減らしやすい,容量や出力方式によって使える機器が限られるため確認が必要,4,2026-06-11

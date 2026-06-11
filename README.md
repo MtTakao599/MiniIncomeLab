@@ -1,6 +1,6 @@
 # MiniIncomeLab
 
-ミニPC上の Ubuntu で定期実行し、静的サイトを自動生成するアフィリエイト/情報サイト生成ツール（v0.1.9）。
+ミニPC上の Ubuntu で定期実行し、静的サイトを自動生成するアフィリエイト/情報サイト生成ツール（v0.2.0）。
 
 - **開発**: Windows + Cursor
 - **管理**: GitHub
@@ -12,9 +12,9 @@
 
 MiniIncomeLab は、商品情報を `content/products_source.csv`、アフィリエイトリンクを `content/affiliate_links.csv` に分けて管理し、`scripts/build_site.py` で静的 HTML を生成する最小構成のサイトビルダーです。
 
-v0.1.9 では、**商品カードのスペック表示を汎用化**しました。`spec1_label` / `spec1_value` 〜 `spec4_*` により、ミニPC本体だけでなく USB-C 充電器・外付け SSD・UPS など周辺機器にも自然なラベルで表示できます。
+v0.2.0 では、トップページの商品一覧を **`group` 列によるグループ表示** に対応しました（例: ミニPC本体 / 周辺機器・常時稼働用品）。
 
-**v0.1.9 時点の参加状況:**
+**v0.2.0 時点の参加状況:**
 
 - **楽天アフィリエイト**: 利用中（リンクは `affiliate_links.csv` の `rakuten_url` に手動で貼る）
 - **Amazonアソシエイト**: 未参加（`amazon_url` は空欄のまま）
@@ -225,7 +225,21 @@ crontab -e
 
 列:
 
-`id,status,name,category,spec1_label,spec1_value,spec2_label,spec2_value,spec3_label,spec3_value,spec4_label,spec4_value,use_case,pros,cons,rating,last_checked`
+`id,status,group,name,category,spec1_label,spec1_value,spec2_label,spec2_value,spec3_label,spec3_value,spec4_label,spec4_value,use_case,pros,cons,rating,last_checked`
+
+`group` 列:
+
+- トップページの **グループ見出し** として使う（例: `ミニPC本体`、`周辺機器・常時稼働用品`）
+- 同じ `group` の商品がまとめて表示される
+- グループ内の並び順は **CSV の行順** を維持する
+- 商品追加時は必ず `group` を設定する
+
+現在のグループ:
+
+| group | 商品数（active） |
+|-------|------------------|
+| ミニPC本体 | 4件 |
+| 周辺機器・常時稼働用品 | 3件 |
 
 スペック表示（`spec1` 〜 `spec4`）:
 

@@ -207,6 +207,26 @@
       gap: 1rem;
     }
 
+    .product-groups {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .product-group-title {
+      margin: 0 0 1rem;
+      font-size: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .group-empty {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
     @media (min-width: 640px) {
       .product-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -432,8 +452,8 @@
     <p><strong>ご購入前のご確認:</strong> 価格・在庫・仕様は販売ページで確認してください。当サイトの掲載内容は参考情報です。</p>
   </section>
 
-  <section class="product-grid" aria-label="ミニPC一覧">
-    <article class="card">
+  <section class="product-groups" aria-label="商品一覧">
+    <section class="product-group" aria-labelledby="product-group-0"><h2 id="product-group-0" class="product-group-title">ミニPC本体</h2><div class="product-grid"><article class="card">
   <div class="card-header">
     <span class="category">エントリー</span>
     <h2>N100系ミニPC</h2>
@@ -556,8 +576,8 @@
 
   <div class="last-checked">最終確認日: 2026-06-11</div>
 </article>
-
-<article class="card">
+</div></section>
+<section class="product-group" aria-labelledby="product-group-1"><h2 id="product-group-1" class="product-group-title">周辺機器・常時稼働用品</h2><div class="product-grid"><article class="card">
   <div class="card-header">
     <span class="category">電源・充電</span>
     <h2>USB-C充電器・モバイルバッテリー</h2>
@@ -649,7 +669,7 @@
 
   <div class="last-checked">最終確認日: 2026-06-11</div>
 </article>
-
+</div></section>
   </section>
 </main>
 

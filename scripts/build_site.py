@@ -291,6 +291,35 @@ def build_product_cards(products: list[dict[str, str]]) -> str:
     return "\n".join(cards)
 
 
+def build_product_groups_html(products: list[dict[str, str]]) -> str:
+    if not products:
+        return '<p class="group-empty">掲載中の商品はありません。</p>'
+
+    groups: list[tuple[str, list[dict[str, str]]]] = []
+    group_index: dict[str, int] = {}
+
+    for product in products:
+        group_name = (product.get("group") or "その他").strip() or "その他"
+        if group_name not in group_index:
+            group_index[group_name] = len(groups)
+            groups.append((group_name, []))
+        groups[group_index[group_name]][1].append(product)
+
+    sections: list[str] = []
+    for index, (group_name, group_products) in enumerate(groups):
+        section_id = f"product-group-{index}"
+        cards_html = build_product_cards(group_products)
+        sections.append(
+            f'<section class="product-group" aria-labelledby="{section_id}">'
+            f'<h2 id="{section_id}" class="product-group-title">'
+            f"{escape(group_name)}</h2>"
+            f'<div class="product-grid">{cards_html}</div>'
+            f"</section>"
+        )
+
+    return "\n".join(sections)
+
+
 def build_article_list_html(articles: list[MarkdownDocument]) -> str:
     if not articles:
         return "<li>記事は準備中です。</li>"
@@ -477,7 +506,7 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
         pages = load_pages()
         log(f"pages/*.md を読み込み: {len(pages)} 件")
 
-        product_cards = build_product_cards(active_products)
+        product_groups = build_product_groups_html(active_products)
         page_content = render_template(
             TEMPLATES_DIR / "index.html",
             {
@@ -486,7 +515,7 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
                 "product_count": escape(str(len(active_products))),
                 "site_updated_date": escape(build_date),
                 "article_list": build_article_list_html(articles),
-                "product_cards": product_cards,
+                "product_groups": product_groups,
             },
         )
 
