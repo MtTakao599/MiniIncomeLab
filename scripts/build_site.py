@@ -15,11 +15,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT_DIR = ROOT / "content"
 TEMPLATES_DIR = ROOT / "templates"
-PUBLIC_DIR = ROOT / "public"
+DOCS_DIR = ROOT / "docs"
 LOGS_DIR = ROOT / "logs"
 
 PRODUCTS_CSV = CONTENT_DIR / "products.csv"
-OUTPUT_HTML = PUBLIC_DIR / "index.html"
+OUTPUT_HTML = DOCS_DIR / "index.html"
 BUILD_LOG = LOGS_DIR / "build.log"
 
 SITE_TITLE = "MiniIncomeLab | ミニPC比較ガイド"
@@ -97,7 +97,7 @@ def build_product_cards(products: list[dict[str, str]]) -> str:
     return "\n".join(cards)
 
 
-def clean_public() -> list[Path]:
+def clean_docs() -> list[Path]:
     removed: list[Path] = []
     for path in GENERATED_PATHS:
         if path.exists():
@@ -118,7 +118,7 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
 
     try:
         if clean:
-            removed = clean_public()
+            removed = clean_docs()
             if removed:
                 names = ", ".join(str(path.relative_to(ROOT)) for path in removed)
                 log(f"clean: 削除しました -> {names}")
@@ -148,8 +148,8 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
             },
         )
 
-        PUBLIC_DIR.mkdir(parents=True, exist_ok=True)
-        (PUBLIC_DIR / "products").mkdir(parents=True, exist_ok=True)
+        DOCS_DIR.mkdir(parents=True, exist_ok=True)
+        (DOCS_DIR / "products").mkdir(parents=True, exist_ok=True)
         OUTPUT_HTML.write_text(final_html, encoding="utf-8")
 
         log(f"生成完了: {OUTPUT_HTML}")
@@ -167,17 +167,17 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="CSV と HTML テンプレートから public/index.html を生成します。",
+        description="CSV と HTML テンプレートから docs/index.html を生成します。",
     )
     parser.add_argument(
         "--clean",
         action="store_true",
-        help="再生成前に public/ 内の既知の生成物（現状は index.html）を削除する",
+        help="再生成前に docs/ 内の既知の生成物（現状は index.html）を削除する",
     )
     parser.add_argument(
         "--open",
         action="store_true",
-        help="生成後に public/index.html を既定ブラウザで開く",
+        help="生成後に docs/index.html を既定ブラウザで開く",
     )
     return parser.parse_args(argv)
 
