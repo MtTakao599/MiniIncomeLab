@@ -36,6 +36,8 @@ META_DESCRIPTION = (
 )
 SITE_DESCRIPTION = "ミニPC選びの参考情報を整理する個人運営サイトです。"
 
+PRODUCT_STATUS_ACTIVE = "active"
+
 GENERATED_PATHS: tuple[Path, ...] = (
     OUTPUT_HTML,
     ROBOTS_TXT,
@@ -69,6 +71,18 @@ def render_template(template_path: Path, values: dict[str, str]) -> str:
 
 def escape(value: str) -> str:
     return html.escape(value or "", quote=True)
+
+
+def normalize_status(value: str) -> str:
+    return (value or PRODUCT_STATUS_ACTIVE).strip().lower()
+
+
+def filter_active_products(products: list[dict[str, str]]) -> list[dict[str, str]]:
+    return [
+        product
+        for product in products
+        if normalize_status(product.get("status", "")) == PRODUCT_STATUS_ACTIVE
+    ]
 
 
 def load_products() -> list[dict[str, str]]:
@@ -370,7 +384,11 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
                 log("clean: 削除対象の生成物はありません")
 
         products = load_products()
-        log(f"products.csv を読み込み: {len(products)} 件")
+        active_products = filter_active_products(products)
+        log(
+            f"products.csv を読み込み: {len(products)} 件 "
+            f"(表示対象: {len(active_products)} 件)"
+        )
 
         articles = load_articles()
         log(f"articles/*.md を読み込み: {len(articles)} 件")
@@ -378,13 +396,13 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
         pages = load_pages()
         log(f"pages/*.md を読み込み: {len(pages)} 件")
 
-        product_cards = build_product_cards(products)
+        product_cards = build_product_cards(active_products)
         page_content = render_template(
             TEMPLATES_DIR / "index.html",
             {
                 "site_title": escape(SITE_TITLE),
                 "site_description": escape(SITE_DESCRIPTION),
-                "product_count": escape(str(len(products))),
+                "product_count": escape(str(len(active_products))),
                 "site_updated_date": escape(build_date),
                 "article_list": build_article_list_html(articles),
                 "product_cards": product_cards,
