@@ -108,22 +108,24 @@ def parse_markdown_document(path: Path) -> MarkdownDocument:
 
 
 def load_articles() -> list[MarkdownDocument]:
+    """記事一覧の並び順: ファイル名（slug）の昇順。"""
     if not ARTICLES_DIR.exists():
         return []
 
     return [
         parse_markdown_document(path)
-        for path in sorted(ARTICLES_DIR.glob("*.md"))
+        for path in sorted(ARTICLES_DIR.glob("*.md"), key=lambda p: p.stem)
     ]
 
 
 def load_pages() -> list[MarkdownDocument]:
+    """固定ページの並び順: ファイル名（slug）の昇順。"""
     if not PAGES_DIR.exists():
         return []
 
     return [
         parse_markdown_document(path)
-        for path in sorted(PAGES_DIR.glob("*.md"))
+        for path in sorted(PAGES_DIR.glob("*.md"), key=lambda p: p.stem)
     ]
 
 
@@ -232,7 +234,10 @@ def build_html_page(
     return output_path
 
 
-def build_article_pages(articles: list[MarkdownDocument]) -> list[Path]:
+def build_article_pages(
+    articles: list[MarkdownDocument],
+    site_updated_date: str,
+) -> list[Path]:
     DOCS_ARTICLES_DIR.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
 
@@ -247,7 +252,10 @@ def build_article_pages(articles: list[MarkdownDocument]) -> list[Path]:
         written.append(
             build_html_page(
                 body_template=TEMPLATES_DIR / "article.html",
-                body_values={"article_content": article_content},
+                body_values={
+                    "article_content": article_content,
+                    "site_updated_date": escape(site_updated_date),
+                },
                 page_title=page_title,
                 meta_description=meta_description,
                 canonical_url=canonical_url,
@@ -349,7 +357,6 @@ def open_in_browser(html_path: Path) -> None:
 
 
 def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
-    build_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     build_date = datetime.now().strftime("%Y-%m-%d")
     log("build_site.py 開始")
 
@@ -378,7 +385,7 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
                 "site_title": escape(SITE_TITLE),
                 "site_description": escape(SITE_DESCRIPTION),
                 "product_count": escape(str(len(products))),
-                "build_time": escape(build_time),
+                "site_updated_date": escape(build_date),
                 "article_list": build_article_list_html(articles),
                 "product_cards": product_cards,
             },
@@ -400,7 +407,7 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
         (DOCS_DIR / "products").mkdir(parents=True, exist_ok=True)
         OUTPUT_HTML.write_text(final_html, encoding="utf-8")
 
-        article_outputs = build_article_pages(articles)
+        article_outputs = build_article_pages(articles, build_date)
         for path in article_outputs:
             log(f"生成完了: {path}")
 

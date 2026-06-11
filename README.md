@@ -1,6 +1,6 @@
 # MiniIncomeLab
 
-ミニPC上の Ubuntu で定期実行し、静的サイトを自動生成するアフィリエイト/情報サイト生成ツール（v0.1.4）。
+ミニPC上の Ubuntu で定期実行し、静的サイトを自動生成するアフィリエイト/情報サイト生成ツール（v0.1.5）。
 
 - **開発**: Windows + Cursor
 - **管理**: GitHub
@@ -12,13 +12,13 @@
 
 MiniIncomeLab は、商品情報を `content/products.csv` に手動で書き込み、`scripts/build_site.py` で静的 HTML を生成する最小構成のサイトビルダーです。
 
-v0.1.4 では「ミニPC比較サイト」の一覧ページ（`docs/index.html`）、記事ページ（`docs/articles/*.html`）、固定ページ（`docs/about.html` / `docs/privacy.html`）、SEO 最低限整備（meta / robots.txt / sitemap.xml）を対象としています。将来的には中古PC、Linux、タイ移住準備、管理人便利グッズなどへ横展開できるよう、CSV + テンプレート + Markdown 構成を維持します。
+v0.1.5 では、アフィリエイト登録前の問い合わせ導線とサイト品質の最終整備（サイト更新日表示、記事ページの内部リンク、記事並び順の明文化）を行っています。
 
-**v0.1.4 時点では、商品情報とリンク先 URL はすべて手動管理です。** 価格・在庫・仕様の自動取得は行いません。Amazonアソシエイト / 楽天アフィリエイトには未参加です。
+**v0.1.5 時点では、商品情報とリンク先 URL はすべて手動管理です。** 価格・在庫・仕様の自動取得は行いません。Amazonアソシエイト / 楽天アフィリエイトには未参加です。
 
 ### Amazon 申請前の方針
 
-Amazonアソシエイト申請前に、**10 記事程度のオリジナルコンテンツ**を `content/articles/` に用意する方針です。v0.1.3 で記事 10 本を整備済みです。v0.1.4 では **アフィリエイト申請前の信頼性整備**として、運営者情報ページとプライバシーポリシーページを追加しています。
+Amazonアソシエイト申請前に、**10 記事程度のオリジナルコンテンツ**を `content/articles/` に用意する方針です。v0.1.3 で記事 10 本、v0.1.4 で運営者情報・プライバシーポリシーを整備済みです。v0.1.5 では問い合わせ導線の文言調整と、全ページ共通の内部リンク整備を行っています。
 
 ### 方針
 
@@ -130,6 +130,27 @@ python3 scripts/build_site.py --clean
 - 固定ページ: `content/pages/*.md` → `docs/<slug>.html`
 
 対応 Markdown 記法は見出し（`#` / `##` / `###`）、段落、箇条書き（`-`）のみです。
+
+### サイト更新日
+
+トップページと記事ページに表示する **サイト更新日 / 最終更新日** は、`build_site.py` 実行日（`YYYY-MM-DD`）です。ビルドのたびに更新されます。
+
+### 記事一覧の並び順
+
+記事一覧は **`content/articles/*.md` のファイル名（slug）昇順** で固定しています。現在の並び:
+
+1. always-on-mini-pc
+2. linux-mini-pc
+3. mini-pc-storage-memory
+4. mini-pc-trouble-check
+5. mini-pc-vs-laptop
+6. n100-mini-pc
+7. n150-mini-pc
+8. ryzen-mini-pc
+9. used-mini-pc
+10. windows-mini-pc
+
+並び順を変えたい場合は、ファイル名を変更するか、`scripts/build_site.py` の `load_articles()` を拡張してください。
 
 ## cron で毎日 4 時に実行する例
 
