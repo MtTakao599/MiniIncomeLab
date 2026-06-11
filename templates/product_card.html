@@ -1,0 +1,36 @@
+<article class="card">
+  <div class="card-header">
+    <span class="category">{{ category }}</span>
+    <h2>{{ name }}</h2>
+    <div class="rating">おすすめ度: {{ rating }} / 5</div>
+  </div>
+
+  <dl class="spec-list">
+    <div><dt>CPU</dt><dd>{{ cpu }}</dd></div>
+    <div><dt>メモリ</dt><dd>{{ memory }}</dd></div>
+    <div><dt>ストレージ</dt><dd>{{ storage }}</dd></div>
+    <div><dt>OS</dt><dd>{{ os }}</dd></div>
+  </dl>
+
+  <div class="note-block">
+    <strong>向いている用途</strong>
+    {{ use_case }}
+  </div>
+
+  <div class="note-block">
+    <strong>メリット</strong>
+    {{ pros }}
+  </div>
+
+  <div class="note-block">
+    <strong>注意点</strong>
+    {{ cons }}
+  </div>
+
+  <div class="links">
+    <a class="btn btn-amazon" href="{{ amazon_url }}" target="_blank" rel="noopener noreferrer sponsored">Amazonで見る</a>
+    <a class="btn btn-rakuten" href="{{ rakuten_url }}" target="_blank" rel="noopener noreferrer sponsored">楽天で見る</a>
+  </div>
+
+  <div class="last-checked">最終確認日: {{ last_checked }}</div>
+</article>

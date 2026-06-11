@@ -1,0 +1,33 @@
+<header>
+  <div class="container">
+    <h1>{{ site_title }}</h1>
+    <p>{{ site_description }}</p>
+  </div>
+</header>
+
+<main class="container">
+  <div class="meta-bar">
+    <span>掲載商品数: {{ product_count }} 件</span>
+    <span>最終更新: {{ build_time }}</span>
+  </div>
+
+  <section class="product-grid" aria-label="ミニPC一覧">
+    {{ product_cards }}
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <h2>アフィリエイト表記</h2>
+    <p>
+      当サイトは、Amazon.co.jp を宣伝するリンクプログラムである
+      Amazonアソシエイト・プログラム、および楽天アフィリエイトの参加者です。
+      リンク経由の購入により、運営者に紹介料が支払われる場合があります。
+    </p>
+    <p>
+      商品情報・スペック・リンク先は手動で管理しています。
+      価格や在庫、仕様は変更されることがあるため、購入前に各販売ページで最新情報をご確認ください。
+    </p>
+    <p>※ 掲載内容はサンプルデータを含みます。正確な情報は随時手動で更新します。</p>
+  </div>
+</footer>

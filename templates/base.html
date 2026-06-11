@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page_title }}</title>
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --text: #1a1a2e;
+      --muted: #5c6370;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --border: #e2e8f0;
+      --rating: #f59e0b;
+      --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1.5rem 0;
+      margin-bottom: 1.5rem;
+    }
+
+    header h1 {
+      margin: 0 0 0.5rem;
+      font-size: 1.75rem;
+    }
+
+    header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    @media (min-width: 640px) {
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 960px) {
+      .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .card-header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      line-height: 1.4;
+    }
+
+    .category {
+      display: inline-block;
+      align-self: flex-start;
+      background: #eff6ff;
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+    }
+
+    .rating {
+      color: var(--rating);
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .spec-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      font-size: 0.875rem;
+    }
+
+    .spec-list li {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.25rem 0;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .spec-list li:last-child {
+      border-bottom: none;
+    }
+
+    .spec-list dt {
+      flex: 0 0 5.5rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .spec-list dd {
+      margin: 0;
+      flex: 1;
+    }
+
+    .note-block {
+      font-size: 0.85rem;
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 0.65rem 0.75rem;
+    }
+
+    .note-block strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: auto;
+    }
+
+    .btn {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: background 0.15s ease;
+    }
+
+    .btn-amazon {
+      background: #ff9900;
+      color: #111;
+    }
+
+    .btn-amazon:hover {
+      background: #e68a00;
+    }
+
+    .btn-rakuten {
+      background: #bf0000;
+      color: #fff;
+    }
+
+    .btn-rakuten:hover {
+      background: #a00000;
+    }
+
+    .last-checked {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      padding: 1.5rem 0 2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    footer h2 {
+      font-size: 0.95rem;
+      color: var(--text);
+      margin: 0 0 0.75rem;
+    }
+
+    footer p {
+      margin: 0 0 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  {{ content }}
+</body>
+</html>
