@@ -4,6 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MiniIncomeLab | ミニPC比較ガイド</title>
+  <meta name="description" content="ミニPC選びの参考情報をまとめた個人運営サイト。用途別の比較と手動確認した商品情報を掲載しています。">
+  <link rel="canonical" href="https://mttakao599.github.io/MiniIncomeLab/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="MiniIncomeLab | ミニPC比較ガイド">
+  <meta property="og:description" content="ミニPC選びの参考情報をまとめた個人運営サイト。用途別の比較と手動確認した商品情報を掲載しています。">
+  <meta property="og:url" content="https://mttakao599.github.io/MiniIncomeLab/">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:site_name" content="MiniIncomeLab">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="MiniIncomeLab | ミニPC比較ガイド">
+  <meta name="twitter:description" content="ミニPC選びの参考情報をまとめた個人運営サイト。用途別の比較と手動確認した商品情報を掲載しています。">
   <style>
     :root {
       --bg: #f4f6f8;
@@ -60,6 +71,113 @@
       margin-bottom: 1.5rem;
       font-size: 0.875rem;
       color: var(--muted);
+    }
+
+    .about-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .about-section h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.1rem;
+    }
+
+    .about-section ul {
+      margin: 0;
+      padding-left: 1.25rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .about-section li + li {
+      margin-top: 0.35rem;
+    }
+
+    .article-list-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .article-list-section h2 {
+      margin: 0 0 0.75rem;
+      font-size: 1.1rem;
+    }
+
+    .article-list {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+
+    .article-list li + li {
+      margin-top: 0.35rem;
+    }
+
+    .article-list a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .article-list a:hover {
+      text-decoration: underline;
+    }
+
+    .site-brand {
+      margin: 0;
+      padding: 1rem 0;
+      font-weight: 700;
+    }
+
+    .site-brand a {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .article-body h1 {
+      margin: 0 0 1rem;
+      font-size: 1.6rem;
+      line-height: 1.35;
+    }
+
+    .article-body h2 {
+      margin: 1.5rem 0 0.75rem;
+      font-size: 1.15rem;
+    }
+
+    .article-body h3 {
+      margin: 1.25rem 0 0.5rem;
+      font-size: 1rem;
+    }
+
+    .article-body p,
+    .article-body ul {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .article-body ul {
+      padding-left: 1.25rem;
+    }
+
+    .back-link {
+      margin: 1.5rem 0 0;
+    }
+
+    .back-link a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .back-link a:hover {
+      text-decoration: underline;
     }
 
     .product-grid {
@@ -228,21 +346,43 @@
   <header>
   <div class="container">
     <h1>MiniIncomeLab | ミニPC比較ガイド</h1>
-    <p>用途別に選べるミニPC比較サイト（v0.1）。商品情報は手動管理のサンプルデータです。</p>
+    <p>ミニPC選びの参考情報を整理する個人運営サイトです。</p>
   </div>
 </header>
 
 <main class="container">
   <div class="meta-bar">
     <span>掲載商品数: 3 件</span>
-    <span>最終更新: 2026-06-11 09:28:59</span>
+    <span>最終更新: 2026-06-11 09:38:23</span>
   </div>
+
+  <section class="about-section" aria-labelledby="about-heading">
+    <h2 id="about-heading">このサイトについて</h2>
+    <ul>
+      <li>ミニPC選びの参考情報を整理する個人運営サイトです。</li>
+      <li>掲載している商品情報は、運営者が手動で確認した内容です。</li>
+      <li>現時点では、商品情報とリンク先 URL も手動で管理しています。</li>
+      <li>価格・在庫・仕様は変更される可能性があります。</li>
+      <li>購入前には、必ず各販売ページで最新情報をご確認ください。</li>
+    </ul>
+  </section>
+
+  <section class="article-list-section" aria-labelledby="articles-heading">
+    <h2 id="articles-heading">記事一覧</h2>
+    <ul class="article-list">
+      <li><a href="articles/always-on-mini-pc.html">常時起動向けミニPCの考え方</a></li>
+<li><a href="articles/linux-mini-pc.html">Linux向けミニPCの選び方</a></li>
+<li><a href="articles/n100-mini-pc.html">N100系ミニPCの選び方</a></li>
+<li><a href="articles/n150-mini-pc.html">N150系ミニPCの選び方</a></li>
+<li><a href="articles/ryzen-mini-pc.html">Ryzen系ミニPCの選び方</a></li>
+    </ul>
+  </section>
 
   <section class="product-grid" aria-label="ミニPC一覧">
     <article class="card">
   <div class="card-header">
     <span class="category">エントリー</span>
-    <h2>【サンプル】N100系ミニPC</h2>
+    <h2>N100系ミニPC</h2>
     <div class="rating">おすすめ度: 4 / 5</div>
   </div>
 
@@ -279,7 +419,7 @@
 <article class="card">
   <div class="card-header">
     <span class="category">バランス</span>
-    <h2>【サンプル】N150系ミニPC</h2>
+    <h2>N150系ミニPC</h2>
     <div class="rating">おすすめ度: 4 / 5</div>
   </div>
 
@@ -316,7 +456,7 @@
 <article class="card">
   <div class="card-header">
     <span class="category">高性能</span>
-    <h2>【サンプル】Ryzen系ミニPC</h2>
+    <h2>Ryzen系ミニPC</h2>
     <div class="rating">おすすめ度: 5 / 5</div>
   </div>
 
@@ -355,17 +495,10 @@
 
 <footer>
   <div class="container">
-    <h2>アフィリエイト表記</h2>
+    <h2>アフィリエイト表記・免責</h2>
     <p>
-      当サイトは、Amazon.co.jp を宣伝するリンクプログラムである
-      Amazonアソシエイト・プログラム、および楽天アフィリエイトの参加者です。
-      リンク経由の購入により、運営者に紹介料が支払われる場合があります。
+      当サイトは今後、Amazonアソシエイトや楽天アフィリエイト等のアフィリエイトプログラムを利用する場合があります。掲載内容は参考情報であり、価格・在庫・仕様は購入前に販売ページでご確認ください。
     </p>
-    <p>
-      商品情報・スペック・リンク先は手動で管理しています。
-      価格や在庫、仕様は変更されることがあるため、購入前に各販売ページで最新情報をご確認ください。
-    </p>
-    <p>※ 掲載内容はサンプルデータを含みます。正確な情報は随時手動で更新します。</p>
   </div>
 </footer>
 

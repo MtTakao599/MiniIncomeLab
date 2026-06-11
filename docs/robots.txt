@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://mttakao599.github.io/MiniIncomeLab/sitemap.xml

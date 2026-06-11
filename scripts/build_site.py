@@ -8,30 +8,46 @@ import csv
 import html
 import sys
 import webbrowser
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT_DIR = ROOT / "content"
+ARTICLES_DIR = CONTENT_DIR / "articles"
 TEMPLATES_DIR = ROOT / "templates"
 DOCS_DIR = ROOT / "docs"
+DOCS_ARTICLES_DIR = DOCS_DIR / "articles"
 LOGS_DIR = ROOT / "logs"
 
 PRODUCTS_CSV = CONTENT_DIR / "products.csv"
 OUTPUT_HTML = DOCS_DIR / "index.html"
+ROBOTS_TXT = DOCS_DIR / "robots.txt"
+SITEMAP_XML = DOCS_DIR / "sitemap.xml"
 BUILD_LOG = LOGS_DIR / "build.log"
 
+SITE_URL = "https://mttakao599.github.io/MiniIncomeLab/"
 SITE_TITLE = "MiniIncomeLab | ミニPC比較ガイド"
-SITE_DESCRIPTION = (
-    "用途別に選べるミニPC比較サイト（v0.1）。"
-    "商品情報は手動管理のサンプルデータです。"
+META_DESCRIPTION = (
+    "ミニPC選びの参考情報をまとめた個人運営サイト。"
+    "用途別の比較と手動確認した商品情報を掲載しています。"
 )
+SITE_DESCRIPTION = "ミニPC選びの参考情報を整理する個人運営サイトです。"
 
-# 再生成前に削除する生成物。将来 HTML を増やしたらここに追加する。
 GENERATED_PATHS: tuple[Path, ...] = (
     OUTPUT_HTML,
+    ROBOTS_TXT,
+    SITEMAP_XML,
 )
+
+
+@dataclass
+class Article:
+    slug: str
+    title: str
+    source: Path
+    summary: str
 
 
 def log(message: str) -> None:
@@ -50,6 +66,10 @@ def render_template(template_path: Path, values: dict[str, str]) -> str:
     return content
 
 
+def escape(value: str) -> str:
+    return html.escape(value or "", quote=True)
+
+
 def load_products() -> list[dict[str, str]]:
     if not PRODUCTS_CSV.exists():
         raise FileNotFoundError(f"products.csv が見つかりません: {PRODUCTS_CSV}")
@@ -64,8 +84,75 @@ def load_products() -> list[dict[str, str]]:
     return rows
 
 
-def escape(value: str) -> str:
-    return html.escape(value or "", quote=True)
+def parse_article_markdown(path: Path) -> Article:
+    text = path.read_text(encoding="utf-8")
+    slug = path.stem
+    title = slug
+    summary = ""
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("# "):
+            title = stripped[2:].strip()
+            break
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or stripped.startswith("- "):
+            continue
+        summary = stripped
+        break
+
+    return Article(slug=slug, title=title, source=path, summary=summary)
+
+
+def load_articles() -> list[Article]:
+    if not ARTICLES_DIR.exists():
+        return []
+
+    articles = [
+        parse_article_markdown(path)
+        for path in sorted(ARTICLES_DIR.glob("*.md"))
+    ]
+    return articles
+
+
+def markdown_to_html(text: str) -> str:
+    parts: list[str] = []
+    in_list = False
+
+    def close_list() -> None:
+        nonlocal in_list
+        if in_list:
+            parts.append("</ul>")
+            in_list = False
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            close_list()
+            continue
+
+        if stripped.startswith("### "):
+            close_list()
+            parts.append(f"<h3>{escape(stripped[4:])}</h3>")
+        elif stripped.startswith("## "):
+            close_list()
+            parts.append(f"<h2>{escape(stripped[3:])}</h2>")
+        elif stripped.startswith("# "):
+            close_list()
+            parts.append(f"<h1>{escape(stripped[2:])}</h1>")
+        elif stripped.startswith("- "):
+            if not in_list:
+                parts.append("<ul>")
+                in_list = True
+            parts.append(f"<li>{escape(stripped[2:])}</li>")
+        else:
+            close_list()
+            parts.append(f"<p>{escape(stripped)}</p>")
+
+    close_list()
+    return "\n".join(parts)
 
 
 def build_product_cards(products: list[dict[str, str]]) -> str:
@@ -97,12 +184,97 @@ def build_product_cards(products: list[dict[str, str]]) -> str:
     return "\n".join(cards)
 
 
+def build_article_list_html(articles: list[Article]) -> str:
+    if not articles:
+        return "<li>記事は準備中です。</li>"
+
+    items: list[str] = []
+    for article in articles:
+        href = f"articles/{article.slug}.html"
+        items.append(
+            f'<li><a href="{href}">{escape(article.title)}</a></li>'
+        )
+    return "\n".join(items)
+
+
+def build_article_pages(articles: list[Article]) -> list[Path]:
+    DOCS_ARTICLES_DIR.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+
+    for article in articles:
+        markdown = article.source.read_text(encoding="utf-8")
+        article_content = markdown_to_html(markdown)
+        page_content = render_template(
+            TEMPLATES_DIR / "article.html",
+            {"article_content": article_content},
+        )
+
+        page_title = f"{article.title} | MiniIncomeLab"
+        meta_description = article.summary or META_DESCRIPTION
+        canonical_url = f"{SITE_URL}articles/{article.slug}.html"
+
+        final_html = render_template(
+            TEMPLATES_DIR / "base.html",
+            {
+                "page_title": escape(page_title),
+                "meta_description": escape(meta_description),
+                "canonical_url": escape(canonical_url),
+                "og_title": escape(page_title),
+                "og_description": escape(meta_description),
+                "content": page_content,
+            },
+        )
+
+        output_path = DOCS_ARTICLES_DIR / f"{article.slug}.html"
+        output_path.write_text(final_html, encoding="utf-8")
+        written.append(output_path)
+
+    return written
+
+
+def build_robots_txt() -> str:
+    return (
+        "User-agent: *\n"
+        "Allow: /\n"
+        f"Sitemap: {SITE_URL}sitemap.xml\n"
+    )
+
+
+def build_sitemap_xml(lastmod_date: str, articles: list[Article]) -> str:
+    urls = [SITE_URL]
+    for article in articles:
+        urls.append(f"{SITE_URL}articles/{article.slug}.html")
+
+    lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ]
+    for url in urls:
+        lines.extend(
+            [
+                "  <url>",
+                f"    <loc>{url}</loc>",
+                f"    <lastmod>{lastmod_date}</lastmod>",
+                "  </url>",
+            ]
+        )
+    lines.append("</urlset>")
+    return "\n".join(lines) + "\n"
+
+
 def clean_docs() -> list[Path]:
     removed: list[Path] = []
+
     for path in GENERATED_PATHS:
         if path.exists():
             path.unlink()
             removed.append(path)
+
+    if DOCS_ARTICLES_DIR.exists():
+        for path in DOCS_ARTICLES_DIR.glob("*.html"):
+            path.unlink()
+            removed.append(path)
+
     return removed
 
 
@@ -114,6 +286,7 @@ def open_in_browser(html_path: Path) -> None:
 
 def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
     build_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    build_date = datetime.now().strftime("%Y-%m-%d")
     log("build_site.py 開始")
 
     try:
@@ -128,6 +301,9 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
         products = load_products()
         log(f"products.csv を読み込み: {len(products)} 件")
 
+        articles = load_articles()
+        log(f"articles/*.md を読み込み: {len(articles)} 件")
+
         product_cards = build_product_cards(products)
         page_content = render_template(
             TEMPLATES_DIR / "index.html",
@@ -136,6 +312,7 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
                 "site_description": escape(SITE_DESCRIPTION),
                 "product_count": escape(str(len(products))),
                 "build_time": escape(build_time),
+                "article_list": build_article_list_html(articles),
                 "product_cards": product_cards,
             },
         )
@@ -144,6 +321,10 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
             TEMPLATES_DIR / "base.html",
             {
                 "page_title": escape(SITE_TITLE),
+                "meta_description": escape(META_DESCRIPTION),
+                "canonical_url": escape(SITE_URL),
+                "og_title": escape(SITE_TITLE),
+                "og_description": escape(META_DESCRIPTION),
                 "content": page_content,
             },
         )
@@ -152,7 +333,16 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
         (DOCS_DIR / "products").mkdir(parents=True, exist_ok=True)
         OUTPUT_HTML.write_text(final_html, encoding="utf-8")
 
+        article_outputs = build_article_pages(articles)
+        for path in article_outputs:
+            log(f"生成完了: {path}")
+
+        ROBOTS_TXT.write_text(build_robots_txt(), encoding="utf-8")
+        SITEMAP_XML.write_text(build_sitemap_xml(build_date, articles), encoding="utf-8")
+
         log(f"生成完了: {OUTPUT_HTML}")
+        log(f"生成完了: {ROBOTS_TXT}")
+        log(f"生成完了: {SITEMAP_XML}")
 
         if open_browser:
             open_in_browser(OUTPUT_HTML)
@@ -167,12 +357,12 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="CSV と HTML テンプレートから docs/index.html を生成します。",
+        description="CSV と HTML テンプレートから docs/ 配下の公開ファイルを生成します。",
     )
     parser.add_argument(
         "--clean",
         action="store_true",
-        help="再生成前に docs/ 内の既知の生成物（現状は index.html）を削除する",
+        help="再生成前に docs/index.html, docs/robots.txt, docs/sitemap.xml, docs/articles/*.html を削除する",
     )
     parser.add_argument(
         "--open",
