@@ -340,6 +340,23 @@
     footer p {
       margin: 0 0 0.5rem;
     }
+
+    .footer-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .footer-nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+
+    .footer-nav a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -353,7 +370,7 @@
 <main class="container">
   <div class="meta-bar">
     <span>掲載商品数: 3 件</span>
-    <span>最終更新: 2026-06-11 09:40:53</span>
+    <span>最終更新: 2026-06-11 09:45:22</span>
   </div>
 
   <section class="about-section" aria-labelledby="about-heading">
@@ -500,6 +517,11 @@
 
 <footer>
   <div class="container">
+    <nav class="footer-nav" aria-label="フッターナビゲーション">
+      <a href="about.html">運営者情報</a>
+      <a href="privacy.html">プライバシーポリシー</a>
+      <a href="#articles-heading">記事一覧</a>
+    </nav>
     <h2>アフィリエイト表記・免責</h2>
     <p>
       当サイトは今後、Amazonアソシエイトや楽天アフィリエイト等のアフィリエイトプログラムを利用する場合があります。掲載内容は参考情報であり、価格・在庫・仕様は購入前に販売ページでご確認ください。

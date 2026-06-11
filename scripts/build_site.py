@@ -16,6 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT_DIR = ROOT / "content"
 ARTICLES_DIR = CONTENT_DIR / "articles"
+PAGES_DIR = CONTENT_DIR / "pages"
 TEMPLATES_DIR = ROOT / "templates"
 DOCS_DIR = ROOT / "docs"
 DOCS_ARTICLES_DIR = DOCS_DIR / "articles"
@@ -43,7 +44,7 @@ GENERATED_PATHS: tuple[Path, ...] = (
 
 
 @dataclass
-class Article:
+class MarkdownDocument:
     slug: str
     title: str
     source: Path
@@ -84,7 +85,7 @@ def load_products() -> list[dict[str, str]]:
     return rows
 
 
-def parse_article_markdown(path: Path) -> Article:
+def parse_markdown_document(path: Path) -> MarkdownDocument:
     text = path.read_text(encoding="utf-8")
     slug = path.stem
     title = slug
@@ -103,18 +104,27 @@ def parse_article_markdown(path: Path) -> Article:
         summary = stripped
         break
 
-    return Article(slug=slug, title=title, source=path, summary=summary)
+    return MarkdownDocument(slug=slug, title=title, source=path, summary=summary)
 
 
-def load_articles() -> list[Article]:
+def load_articles() -> list[MarkdownDocument]:
     if not ARTICLES_DIR.exists():
         return []
 
-    articles = [
-        parse_article_markdown(path)
+    return [
+        parse_markdown_document(path)
         for path in sorted(ARTICLES_DIR.glob("*.md"))
     ]
-    return articles
+
+
+def load_pages() -> list[MarkdownDocument]:
+    if not PAGES_DIR.exists():
+        return []
+
+    return [
+        parse_markdown_document(path)
+        for path in sorted(PAGES_DIR.glob("*.md"))
+    ]
 
 
 def markdown_to_html(text: str) -> str:
@@ -184,7 +194,7 @@ def build_product_cards(products: list[dict[str, str]]) -> str:
     return "\n".join(cards)
 
 
-def build_article_list_html(articles: list[Article]) -> str:
+def build_article_list_html(articles: list[MarkdownDocument]) -> str:
     if not articles:
         return "<li>記事は準備中です。</li>"
 
@@ -197,37 +207,78 @@ def build_article_list_html(articles: list[Article]) -> str:
     return "\n".join(items)
 
 
-def build_article_pages(articles: list[Article]) -> list[Path]:
+def build_html_page(
+    *,
+    body_template: Path,
+    body_values: dict[str, str],
+    page_title: str,
+    meta_description: str,
+    canonical_url: str,
+    output_path: Path,
+) -> Path:
+    page_content = render_template(body_template, body_values)
+    final_html = render_template(
+        TEMPLATES_DIR / "base.html",
+        {
+            "page_title": escape(page_title),
+            "meta_description": escape(meta_description),
+            "canonical_url": escape(canonical_url),
+            "og_title": escape(page_title),
+            "og_description": escape(meta_description),
+            "content": page_content,
+        },
+    )
+    output_path.write_text(final_html, encoding="utf-8")
+    return output_path
+
+
+def build_article_pages(articles: list[MarkdownDocument]) -> list[Path]:
     DOCS_ARTICLES_DIR.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
 
     for article in articles:
         markdown = article.source.read_text(encoding="utf-8")
         article_content = markdown_to_html(markdown)
-        page_content = render_template(
-            TEMPLATES_DIR / "article.html",
-            {"article_content": article_content},
-        )
-
         page_title = f"{article.title} | MiniIncomeLab"
         meta_description = article.summary or META_DESCRIPTION
         canonical_url = f"{SITE_URL}articles/{article.slug}.html"
+        output_path = DOCS_ARTICLES_DIR / f"{article.slug}.html"
 
-        final_html = render_template(
-            TEMPLATES_DIR / "base.html",
-            {
-                "page_title": escape(page_title),
-                "meta_description": escape(meta_description),
-                "canonical_url": escape(canonical_url),
-                "og_title": escape(page_title),
-                "og_description": escape(meta_description),
-                "content": page_content,
-            },
+        written.append(
+            build_html_page(
+                body_template=TEMPLATES_DIR / "article.html",
+                body_values={"article_content": article_content},
+                page_title=page_title,
+                meta_description=meta_description,
+                canonical_url=canonical_url,
+                output_path=output_path,
+            )
         )
 
-        output_path = DOCS_ARTICLES_DIR / f"{article.slug}.html"
-        output_path.write_text(final_html, encoding="utf-8")
-        written.append(output_path)
+    return written
+
+
+def build_static_pages(pages: list[MarkdownDocument]) -> list[Path]:
+    written: list[Path] = []
+
+    for page in pages:
+        markdown = page.source.read_text(encoding="utf-8")
+        page_content = markdown_to_html(markdown)
+        page_title = f"{page.title} | MiniIncomeLab"
+        meta_description = page.summary or META_DESCRIPTION
+        canonical_url = f"{SITE_URL}{page.slug}.html"
+        output_path = DOCS_DIR / f"{page.slug}.html"
+
+        written.append(
+            build_html_page(
+                body_template=TEMPLATES_DIR / "page.html",
+                body_values={"page_content": page_content},
+                page_title=page_title,
+                meta_description=meta_description,
+                canonical_url=canonical_url,
+                output_path=output_path,
+            )
+        )
 
     return written
 
@@ -240,8 +291,14 @@ def build_robots_txt() -> str:
     )
 
 
-def build_sitemap_xml(lastmod_date: str, articles: list[Article]) -> str:
+def build_sitemap_xml(
+    lastmod_date: str,
+    pages: list[MarkdownDocument],
+    articles: list[MarkdownDocument],
+) -> str:
     urls = [SITE_URL]
+    for page in pages:
+        urls.append(f"{SITE_URL}{page.slug}.html")
     for article in articles:
         urls.append(f"{SITE_URL}articles/{article.slug}.html")
 
@@ -275,6 +332,13 @@ def clean_docs() -> list[Path]:
             path.unlink()
             removed.append(path)
 
+    if PAGES_DIR.exists():
+        for md_path in PAGES_DIR.glob("*.md"):
+            html_path = DOCS_DIR / f"{md_path.stem}.html"
+            if html_path.exists():
+                html_path.unlink()
+                removed.append(html_path)
+
     return removed
 
 
@@ -303,6 +367,9 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
 
         articles = load_articles()
         log(f"articles/*.md を読み込み: {len(articles)} 件")
+
+        pages = load_pages()
+        log(f"pages/*.md を読み込み: {len(pages)} 件")
 
         product_cards = build_product_cards(products)
         page_content = render_template(
@@ -337,8 +404,15 @@ def build_site(*, clean: bool = False, open_browser: bool = False) -> int:
         for path in article_outputs:
             log(f"生成完了: {path}")
 
+        page_outputs = build_static_pages(pages)
+        for path in page_outputs:
+            log(f"生成完了: {path}")
+
         ROBOTS_TXT.write_text(build_robots_txt(), encoding="utf-8")
-        SITEMAP_XML.write_text(build_sitemap_xml(build_date, articles), encoding="utf-8")
+        SITEMAP_XML.write_text(
+            build_sitemap_xml(build_date, pages, articles),
+            encoding="utf-8",
+        )
 
         log(f"生成完了: {OUTPUT_HTML}")
         log(f"生成完了: {ROBOTS_TXT}")
@@ -362,7 +436,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--clean",
         action="store_true",
-        help="再生成前に docs/index.html, docs/robots.txt, docs/sitemap.xml, docs/articles/*.html を削除する",
+        help="再生成前に docs/index.html, docs/about.html, docs/privacy.html, docs/robots.txt, docs/sitemap.xml, docs/articles/*.html を削除する",
     )
     parser.add_argument(
         "--open",
